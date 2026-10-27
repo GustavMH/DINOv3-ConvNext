@@ -1,24 +1,9 @@
 #!/usr/bin/env python3
-"""fetch_weights.py — download DINOv3 weights from the Meta email and verify them.
+"""fetch_weights.py
+python3 scripts/fetch_weights.py
+python3 scripts/fetch_weights.py --dest /data/w
+python3 scripts/fetch_weights.py --only sat493m
 
-Usage
------
-1. Paste the *whole* email body (the "name on one line, https://... on the next"
-   block) into `a3/weights.urls`. Nothing else needs editing.
-2. python3 scripts/fetch_weights.py                 # downloads to a3/weights/
-   python3 scripts/fetch_weights.py --dest /data/w   # somewhere with space
-   python3 scripts/fetch_weights.py --only sat493m   # filter by substring
-
-Why this instead of a browser: the URLs are presigned bearer tokens that expire
-(hours-to-days). wget is required by Meta's README for exactly this reason, and
-`-c` lets you resume the 27 GB ViT-7B instead of restarting it.
-
-Verification: Meta's filenames embed the first 8 hex digits of the SHA-256, e.g.
-`dinov3_vitl16_pretrain_sat493m-<8hex>.pth`. Every download is checked against
-that. `torch.hub.load(..., check_hash=True)` does the same check.
-
-NOTE: the URL file is a secret. Do not commit it, do not paste logs with
-`set -x` on, do not share the .urls file.
 """
 import argparse
 import hashlib

@@ -1,28 +1,8 @@
 #!/usr/bin/env python3
-"""inspect_weights.py — settle PLAN.md §4.4 in five minutes.
-
-Question this answers: **does a released DINOv3 checkpoint contain the DINO/iBOT
-"heads", or only the backbone?**
-
-Why it matters: the distillation code path (dinov3/train/ssl_meta_arch.py:336,
-inside `init_weights`) loads a checkpoint into a ModuleDict holding
-`backbone`, `dino_head`, `ibot_head` with `load_state_dict(..., strict=True)`.
-If the released file is backbone-only, that load raises
-`RuntimeError: Missing key(s) in state_dict: "dino_head...", "ibot_head..."`.
-This script tells you that before you burn a day on it.
-
-Usage
------
-    python3 scripts/inspect_weights.py weights/*.pth
-    python3 scripts/inspect_weights.py --mmap weights/dinov3_vit7b16*.pth   # 27 GB, low RAM
-    python3 scripts/inspect_weights.py --forward weights/dinov3_vitl16*.pth # needs RAM for the model
-
-Reading the output
-------------------
-    top-level prefixes: {'blocks': 24, 'rope_embed': 1, ...}   → flat backbone dict
-    HAS dino_head/ibot_head: False                             → §4.4 confirmed
-                                                                  ⇒ plan Step 3 is REQUIRED
-    HAS dino_head/ibot_head: True                              → bonus, Step 3 can be skipped
+"""inspect_weights.py
+python3 scripts/inspect_weights.py weights/*.pth
+python3 scripts/inspect_weights.py --mmap weights/dinov3_vit7b16*.pth   # 27 GB, low RAM
+python3 scripts/inspect_weights.py --forward weights/dinov3_vitl16*.pth # needs RAM for the model
 """
 import argparse
 import sys
