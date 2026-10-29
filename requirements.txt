@@ -1,0 +1,8 @@
+torch>=2.8
+torchvision
+timm>=1.0.20
+lightly-train>=0.18
+numpy
+pillow
+rasterio
+awscli
