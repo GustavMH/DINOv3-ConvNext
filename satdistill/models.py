@@ -3,6 +3,17 @@ import timm
 import torch
 import torch.nn as nn
 
+import torch.nn.functional as F
+
+from types import MethodType
+
+def forward_features(self, x: torch.Tensor) -> torch.Tensor:
+    """Forward pass through feature extraction layers."""
+    x = F.interpolate(x, scale_factor=2, mode="bilinear", align_corners=False)
+    x = self.stem(x)
+    x = self.stages(x)
+    x = self.norm_pre(x)
+    return x
 
 class Backbone(nn.Module):
     def __init__(self, name=None, checkpoint=None):
@@ -11,6 +22,8 @@ class Backbone(nn.Module):
         saved = torch.load(checkpoint, map_location="cpu") if checkpoint else None
         self.model = timm.create_model(saved["student_name"] if saved else name, pretrained=saved is None,
                                        num_classes=0)
+
+        self.model.forward_features = MethodType(forward_features, self.model)
         cfg = dict(self.model.pretrained_cfg)
         if saved:
             self.model.load_state_dict(saved["student"])

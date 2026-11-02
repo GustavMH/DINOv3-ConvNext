@@ -27,12 +27,12 @@ case ${1:-} in
     distill)
         python -u -m satdistill.distill --teacher "${2:?usage: $0 distill sat|web}" --method "${METHOD:-v3}" \
             --data $crops/distill --epochs "${EPOCHS:-10}" --batch-size "${BATCH:-64}" --workers "${WORKERS:-8}" \
-            --out-dir "$out"
+            --out-dir "$out" --student-size "${3}"
         ;;
     probe)
-        for model in convnext_tiny.dinov3_lvd1689m vit_large_patch16_dinov3.lvd1689m vit_large_patch16_dinov3.sat493m; do
-            probe --model=$model
-        done
+        #for model in convnext_tiny.dinov3_lvd1689m vit_large_patch16_dinov3.lvd1689m vit_large_patch16_dinov3.sat493m; do
+        #    probe --model=$model
+        #done
         for ckpt in "$out"/student_*.pt; do
             [[ -f $ckpt ]] && probe --ckpt="$ckpt"
         done
