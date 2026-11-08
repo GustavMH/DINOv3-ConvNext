@@ -1,17 +1,10 @@
-# data and weights: never commit
 data/
 *.pt
 *.ckpt
 *.safetensors
-
-# training artefacts (checkpoints, tensorboard, exported models)
 results/lightly_*/
 results/**/checkpoints/
 results/**/exported_models/
-
-# expiring presigned URLs from Meta
 weights.urls
-
-# python
 __pycache__/
 *.pyc
