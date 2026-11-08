@@ -1,6 +1,6 @@
 # Training-length ablation
 
-Train ConvNeXt-Tiny with web and satellite DINOv3 teachers for 100 epochs. Evaluate checkpoints at epochs 5, 10, 20, 40, 60, 80 and 100 using three probe seeds.
+Train ConvNeXt-Tiny with web and satellite teachers for 100 epochs, then evaluate seven checkpoints with three probe seeds.
 
 ## Install and prepare
 
@@ -14,8 +14,8 @@ bash scripts/run_pilot.sh prepare
 ## Train
 
 ```bash
-python -m satdistill.experiment train --teacher web --accelerator gpu --devices 1 --precision bf16-mixed
-python -m satdistill.experiment train --teacher sat --accelerator gpu --devices 1 --precision bf16-mixed
+python -m satdistill.distill --teacher web --epochs 100 --workers 4 --out-dir results/full100 --save-checkpoints
+python -m satdistill.distill --teacher sat --epochs 100 --workers 4 --out-dir results/full100 --save-checkpoints
 ```
 
 ## Evaluate
@@ -24,8 +24,10 @@ python -m satdistill.experiment train --teacher sat --accelerator gpu --devices 
 python -m satdistill.probe_all_checkpoints
 ```
 
-Probes train for 30 epochs with seeds 0, 1 and 2. Maryland training crops are used to evaluate Maryland test and New York test. LoveDA training crops are used to evaluate LoveDA validation.
+The script exports epochs 5, 10, 20, 40, 60, 80 and 100, then evaluates each with probe seeds 0, 1 and 2.
 
-Scores are saved as JSON files in results/full100/training_length_ablation.
+Probes fit on Maryland train and score on Maryland test and New York test. A separate probe fits on LoveDA train and scores on LoveDA validation.
 
-Results may vary with package versions and hardware.
+JSON scores are saved under results/full100/training_length_ablation.
+
+Scores can vary with software versions, hardware, precision and random initialisation.

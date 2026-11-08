@@ -35,6 +35,7 @@ def parse_args():
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--tag", default="")
     parser.add_argument("--out-dir", default="results")
+    parser.add_argument("--save-checkpoints", action="store_true")
     return parser.parse_args()
 
 
@@ -60,14 +61,27 @@ def main():
     logging.getLogger("lightly_train._commands.train_helpers").addFilter(SatNormalizationFilter())
     run_dir = os.path.join(args.out_dir, "lightly_" + name)
     resume = os.path.exists(os.path.join(run_dir, "checkpoints", "last.ckpt"))
+    checkpoint_args = {}
+    if args.save_checkpoints:
+        checkpoint_args = {"callbacks": {"model_checkpoint": {
+            "every_n_epochs": 5, "save_top_k": -1, "save_last": True,
+            "filename": "epoch{epoch:03d}-step{step}",
+        }}}
     lightly_train.pretrain(
         out=run_dir, data=os.path.join(args.data, "images"), model=STUDENT, method=METHODS[args.method],
         method_args={"teacher": teacher}, epochs=args.epochs, batch_size=args.batch_size, num_workers=args.workers,
-        transform_args={"normalize": normalize}, resume_interrupted=resume, overwrite=not resume)
+        transform_args={"normalize": normalize}, resume_interrupted=resume, overwrite=not resume, **checkpoint_args)
 
     student = export_to_timm(os.path.join(run_dir, "exported_models", "exported_last.pt"))
-    torch.save({"student": student, "student_name": STUDENT_TIMM, "teacher": teacher, "method": args.method,
-                "normalize": normalize, "args": vars(args)}, out_path)
+    torch.save(
+        {"student": student,
+         "student_name": STUDENT_TIMM,
+         "teacher": teacher,
+         "method": args.method,
+         "normalize": normalize, 
+         "args": vars(args)
+         },
+        out_path)
     print("Saved", out_path)
 
 
