@@ -1,0 +1,150 @@
+=============================================================================
+1. MAIN TABLE  (256 px, 10 epochs unless noted; mean ± sample std over seeds)
+=============================================================================
+                                                                 md           ny       md@512       ny@512       loveda
+ConvNeXt-T released (web init, no distillation)              0.5449       0.4962            -            -       0.4229
+  + sat teacher  (4 seeds)                             0.5576±0.004 0.5230±0.005            -            - 0.4257±0.007
+  + web teacher  (3 seeds)                             0.5695±0.004 0.5382±0.003       0.5554       0.5454 0.4425±0.004
+ViT-L/16 sat teacher (frozen)                                0.6149       0.5887       0.6033       0.5998       0.4845
+ViT-L/16 web teacher (frozen)                                0.6246       0.5959       0.6065       0.6072       0.4909
+
+=====================================================================
+1b. DELTAS OVER THE STUDENT'S OWN INITIALISATION  (percentage points)
+=====================================================================
+                                                                 md           ny       md@512       ny@512       loveda
+sat teacher  - init                                           +1.27        +2.68            -            -        +0.28
+web teacher  - init                                           +2.46        +4.20            -            -        +1.96
+web teacher  - sat teacher                                    +1.19        +1.53            -            -        +1.68
+
+========================================
+1c. EPOCH SATURATION  (10 vs 100 epochs)
+========================================
+                                                                 md           ny       md@512       ny@512       loveda
+sat teacher      10 ep (4 seeds)                       0.5576±0.004 0.5230±0.005            -            - 0.4257±0.007
+sat teacher     100 ep                                 0.5528±0.008 0.5129±0.002            -            - 0.4239±0.010
+                100 - 10                                      -0.49        -1.00            -            -        -0.18
+web teacher      10 ep (3 seeds)                       0.5695±0.004 0.5382±0.003       0.5554       0.5454 0.4425±0.004
+web teacher     100 ep                                       0.5642       0.5406            -            -       0.4519
+                100 - 10                                      -0.53        +0.24            -            -        +0.94
+
+======================================================
+2. LOSS ABLATION  (sat teacher, ConvNeXt-T, 10 epochs)
+======================================================
+                                                                 md           ny       md@512       ny@512       loveda
+full objective  (4 seeds)                              0.5576±0.004 0.5230±0.005            -            - 0.4257±0.007
+- local-crop branch (1 seed)                                 0.5437       0.5007            -            -       0.4216
+- memory queue      (1 seed)                                 0.5508       0.5095            -            -       0.4144
+random-init student (1 seed)                                 0.4552       0.3934            -            -       0.2391
+no distillation at all (init)                                0.5449       0.4962            -            -       0.4229
+
+Deltas vs the full objective (percentage points):
+                                                                 md           ny       md@512       ny@512       loveda
+- local-crop branch                                           -1.39        -2.22            -            -        -0.41
+- memory queue                                                -0.68        -1.35            -            -        -1.13
+random-init student                                          -10.24       -12.96            -            -       -18.66
+
+Deltas vs doing nothing (local-branch ablation should be ~0):
+                                                                 md           ny       md@512       ny@512       loveda
+- local-crop branch                                           -0.12        +0.45            -            -        -0.13
+
+===============================================================================
+2b. LOSS ABLATION AT 100 EPOCHS
+===============================================================================
+                                                                 md           ny       md@512       ny@512       loveda
+full objective, 100 ep                                 0.5528±0.008 0.5129±0.002            -            - 0.4239±0.010
+- local-crop branch                                          0.5438       0.5151            -            -       0.4174
+    vs full @100                                              -0.90        +0.22            -            -        -0.65
+    vs no distillation                                        -0.11        +1.89            -            -        -0.55
+- memory queue                                               0.5276       0.4868            -            -       0.3902
+    vs full @100                                              -2.52        -2.61            -            -        -3.37
+    vs no distillation                                        -1.73        -0.94            -            -        -3.27
+
+F1 decision rule: if 'local-crop branch vs full @100' is still about
+-1.4 / -2.2 pp, the effect is budget-independent and can be stated unqualified.
+
+===============================================
+3. STUDENT SIZE SWEEP  (sat teacher, 10 epochs)
+===============================================
+                                                                 md           ny       md@512       ny@512       loveda
+ConvNeXt-T  29M   5 GFLOPs                             0.5576±0.004 0.5230±0.005            -            - 0.4257±0.007
+ConvNeXt-S   50M  11 GFLOPs                                  0.5530       0.5231            -            -       0.4226
+ConvNeXt-B   89M  20 GFLOPs                                  0.5566       0.5185            -            -       0.4347
+ConvNeXt-L  198M  38 GFLOPs                                  0.5615       0.5173       0.5511       0.5239       0.4469
+ViT-L/16 sat teacher  303M  163 GFLOPs                       0.6149       0.5887       0.6033       0.5998       0.4845
+
+====================================
+4. INPUT RESOLUTION  (256 vs 512 px)
+====================================
+                                                                 md           ny       md@512       ny@512       loveda
+ViT-L web teacher                                            0.6246       0.5959       0.6065       0.6072       0.4909
+ViT-L sat teacher                                            0.6149       0.5887       0.6033       0.5998       0.4845
+ConvNeXt-T (web teacher)                                     0.5660       0.5363       0.5554       0.5454       0.4475
+    gap to its teacher, md:                                 +5.86 (256)   +5.11 (512)
+ConvNeXt-L (sat teacher)                                     0.5615       0.5173       0.5511       0.5239       0.4469
+    gap to its teacher, md:                                 +5.34 (256)   +5.22 (512)
+
+===============================================
+5. PER-CLASS IoU  (chesapeake, in-domain split)
+===============================================
+
+-- chesapeake
+model                                                 road  barren  imperv   water
+convnext_tiny-web                                    0.221   0.122   0.369   0.941
+convnext_tiny-web_from_sat_v3                        0.233   0.108   0.394   0.958
+convnext_tiny-web_from_sat_v3_e100nolocal            0.201   0.077   0.379   0.954
+convnext_tiny-web_from_sat_v3_e100noqueue            0.199   0.050   0.355   0.932
+convnext_tiny-web_from_sat_v3_e100s1                 0.207   0.051   0.389   0.954
+convnext_tiny-web_from_sat_v3_e100s2                 0.232   0.078   0.392   0.956
+convnext_tiny-web_from_sat_v3_ep100                  0.234   0.115   0.397   0.955
+convnext_tiny-web_from_sat_v3_nolocal                0.187   0.094   0.378   0.954
+convnext_tiny-web_from_sat_v3_noqueue                0.207   0.107   0.391   0.945
+convnext_tiny-web_from_sat_v3_seed1                  0.228   0.116   0.394   0.959
+convnext_tiny-web_from_sat_v3_seed2                  0.212   0.096   0.389   0.956
+convnext_tiny-web_from_sat_v3_seed3                  0.225   0.117   0.386   0.956
+convnext_tiny-web_from_web_v3_webT                   0.261   0.103   0.405   0.958
+convnext_tiny-web_from_web_v3_webT100                0.267   0.081   0.408   0.958
+convnext_tiny-web_from_web_v3_webTseed1              0.264   0.118   0.408   0.956
+convnext_tiny-web_from_web_v3_webTseed2              0.268   0.134   0.409   0.957
+dinov3-convnext-base_from_sat_v3_sat10               0.227   0.090   0.401   0.960
+dinov3-convnext-large_from_sat_v3_sat10              0.225   0.123   0.393   0.960
+dinov3-convnext-small_from_sat_v3_sat10              0.221   0.085   0.393   0.956
+timm-convnext_tiny_from_sat_v3_randinit              0.007   0.001   0.311   0.836
+vitl-sat                                             0.373   0.146   0.486   0.969
+vitl-web                                             0.379   0.211   0.480   0.966
+
+-- chesapeake512
+model                                                 road  barren  imperv   water
+convnext_tiny-web_from_web_v3_webT                   0.264   0.036   0.423   0.953
+dinov3-convnext-large_from_sat_v3_sat10              0.226   0.049   0.413   0.960
+vitl-sat                                             0.371   0.072   0.500   0.969
+vitl-web                                             0.401   0.064   0.498   0.969
+
+====================================================
+6. DID THE SWITCHES TAKE EFFECT?  (must print 0 / 0)
+====================================================
+loss_local_weight    "loss_local_weight": 0,
+queue_size           "queue_size": 0,
+
+===================================
+7. student parameter counts
+===================================
+   student_convnext_tiny-web_from_sat_v3_e100nolocal.pt
+   student_convnext_tiny-web_from_sat_v3_e100noqueue.pt
+   student_convnext_tiny-web_from_sat_v3_e100s1.pt
+   student_convnext_tiny-web_from_sat_v3_e100s2.pt
+   student_convnext_tiny-web_from_sat_v3_ep100.pt
+   student_convnext_tiny-web_from_sat_v3_nolocal.pt
+   student_convnext_tiny-web_from_sat_v3_noqueue.pt
+   student_convnext_tiny-web_from_sat_v3_seed1.pt
+   student_convnext_tiny-web_from_sat_v3_seed2.pt
+   student_convnext_tiny-web_from_sat_v3_seed3.pt
+   student_convnext_tiny-web_from_web_v3_webT.pt
+   student_convnext_tiny-web_from_web_v3_webT100.pt
+   student_convnext_tiny-web_from_web_v3_webTseed1.pt
+   student_convnext_tiny-web_from_web_v3_webTseed2.pt
+   student_dinov3-convnext-base_from_sat_v3_sat10.pt
+   student_dinov3-convnext-large_from_sat_v3_sat10.pt
+   student_dinov3-convnext-small_from_sat_v3_sat10.pt
+   student_timm-convnext_tiny_from_sat_v3_randinit.pt
+
+(reference: ConvNeXt-T 29M/5, -S 50M/11, -B 89M/20, -L 198M/38 GFLOPs @256)
