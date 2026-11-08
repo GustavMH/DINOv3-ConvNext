@@ -38,7 +38,7 @@ def parse_args():
 
 @torch.no_grad()
 def extract(backbone, folder, device, batch_size=64):
-    loader = torch.utils.data.DataLoader(Crops(folder), batch_size=batch_size, num_workers=4)
+    loader = torch.utils.data.DataLoader(Crops(folder, labels=True), batch_size=batch_size, num_workers=4)
     features, labels = [], []
     for x, y in loader:
         with torch.autocast(device.type, dtype=torch.bfloat16, enabled=device.type == "cuda"):
